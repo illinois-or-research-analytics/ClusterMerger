@@ -30,8 +30,10 @@ else()
     # File paths
     set(SOURCE_MAIN ${CMAKE_SOURCE_DIR}/src/main.cpp)
     set(SOURCE_INTERNAL_LIBS
+        ${CMAKE_SOURCE_DIR}/src/weighted_merger.cpp
         ${CMAKE_SOURCE_DIR}/src/disjoint_merger.cpp
         ${CMAKE_SOURCE_DIR}/src/cluster_merger.cpp
+        ${CMAKE_SOURCE_DIR}/src/graph.cpp
     )
     #[[ CONSTANTS END ]]
 

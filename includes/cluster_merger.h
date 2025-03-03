@@ -1,6 +1,5 @@
 #ifndef CLUSTER_MERGER_H
 #define CLUSTER_MERGER_H
-// mincut_custom.h needs to be included first because of string override
 
 #include <cmath>
 #include <chrono>
@@ -54,7 +53,7 @@ class ClusterMerger {
         static inline std::map<int, std::vector<int>> ReadCommunities(std::string existing_clustering) {
             std::map<int, std::vector<int>> partition_map;
             std::map<int, std::vector<int>> non_singleton_partition_map;
-            char delimiter = get_delimiter(existing_clustering);
+            char delimiter = ClusterMerger::get_delimiter(existing_clustering);
             std::ifstream existing_clustering_file(existing_clustering);
             std::string line;
             while(std::getline(existing_clustering_file, line)) {
