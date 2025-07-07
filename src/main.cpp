@@ -9,9 +9,6 @@
 int main(int argc, char* argv[]) {
     argparse::ArgumentParser main_program("cluster-merger");
 
-    argparse::ArgumentParser wm("Weighted");
-    wm.add_description("Weighted merger");
-
     argparse::ArgumentParser dm("Disjoint");
     dm.add_description("Disjoint merger");
 
@@ -33,12 +30,24 @@ int main(int argc, char* argv[]) {
         .help("Log level where 0 = silent, 1 = info, 2 = verbose")
         .scan<'d', int>();
 
+
+    argparse::ArgumentParser wm("Weighted");
+    wm.add_description("Weighted merger");
+
     wm.add_argument("--edgelist")
         .required()
         .help("Input edgelist");
     wm.add_argument("--clustering-list")
         .required()
         .help("List of clustering files");
+    wm.add_argument("--weighting-strategy")
+        .default_value(int(1))
+        .help("strategy for weighting edges")
+        .scan<'d', int>();
+    wm.add_argument("--threshold")
+        .default_value(float(-1))
+        .help("Threshold")
+        .scan<'f', float>();
     wm.add_argument("--num-processors")
         .default_value(int(1))
         .help("Number of processors")
@@ -46,6 +55,9 @@ int main(int argc, char* argv[]) {
     wm.add_argument("--output-file")
         .required()
         .help("Output clustering file");
+    wm.add_argument("--output-weighted-graph")
+        .default_value("")
+        .help("Output weighted graph");
     wm.add_argument("--log-file")
         .required()
         .help("Output log file");
@@ -76,11 +88,14 @@ int main(int argc, char* argv[]) {
     } else if(main_program.is_subcommand_used(wm)) {
         std::string edgelist = wm.get<std::string>("--edgelist");
         std::string clustering_list = wm.get<std::string>("--clustering-list");
+        int weighting_strategy = wm.get<int>("--weighting-strategy");
+        float threshold = wm.get<float>("--threshold");
         int num_processors = wm.get<int>("--num-processors");
         std::string output_file = wm.get<std::string>("--output-file");
+        std::string output_weighted_graph = wm.get<std::string>("--output-weighted-graph");
         std::string log_file = wm.get<std::string>("--log-file");
         int log_level = wm.get<int>("--log-level") - 1; // so that enum is cleaner
-        ClusterMerger* wm = new WeightedMerger(edgelist, clustering_list, num_processors, output_file, log_file, log_level);
+        ClusterMerger* wm = new WeightedMerger(edgelist, clustering_list, weighting_strategy, threshold, num_processors, output_file, output_weighted_graph, log_file, log_level);
         wm->main();
         delete wm;
     }

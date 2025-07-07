@@ -7,6 +7,12 @@ if("${CMAKE_BINARY_DIR}" STREQUAL "${CMAKE_SOURCE_DIR}")
 else()
     #[[ Set project version ]]
     project(consensus_clustering)
+    list(APPEND CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/external_libs/lib/cmake/igraph)
+    list(APPEND CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/external_libs/lib/cmake/libleidenalg)
+    list(APPEND CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/external_libs/lib64/cmake/igraph)
+    list(APPEND CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/external_libs/lib64/cmake/libleidenalg)
+    find_package(igraph 0.10 CONFIG REQUIRED)
+    find_package(libleidenalg 0.11 CONFIG REQUIRED)
     find_package(OpenMP REQUIRED)
 
     set(CLUSTER_MERGER_MAJOR_VERSION 0)
@@ -47,6 +53,8 @@ else()
         PUBLIC ${CMAKE_SOURCE_DIR}/includes
         PUBLIC ${CMAKE_SOURCE_DIR}/src
     )
+    target_link_libraries(internal_libs PUBLIC igraph::igraph)
+    target_link_libraries(internal_libs PUBLIC libleidenalg::libleidenalg)
     target_link_libraries(internal_libs PUBLIC OpenMP::OpenMP_CXX)
     target_link_libraries(cluster_merger PUBLIC internal_libs)
 

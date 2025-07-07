@@ -9,12 +9,69 @@ void WeightedMerger::InitClusteringList() {
         for (auto const& [cluster_id, cluster_vec] : current_non_singleton_clustering) {
             for (size_t i = 0; i < cluster_vec.size(); i ++) {
                 node_to_cluster_id_map[cluster_vec[i]] = cluster_id;
-                this->graph->AddNode(cluster_vec[i]);
             }
         }
         this->clustering_list_vec.push_back(node_to_cluster_id_map);
     }
     this->WriteToLogFile("Read " + std::to_string(this->clustering_list_vec.size()) + " clusterings", Log::info);
+}
+
+float WeightedMerger::ScoreEdgeTypeZero(std::pair<int, int> edge) {
+    int co_cluster_count = 0;
+    int cluster_count = 0;
+    for(size_t i = 0; i < this->clustering_list_vec.size(); i ++) {
+        const std::map<int, int>& current_clustering = this->clustering_list_vec.at(i);
+        if (current_clustering.contains(edge.first) && current_clustering.contains(edge.second)) {
+            cluster_count += 1;
+            if (current_clustering.at(edge.first) == current_clustering.at(edge.second)) {
+                co_cluster_count += 1;
+            }
+        }
+    }
+    if (co_cluster_count > 0) {
+        return (float)co_cluster_count / cluster_count;
+    }
+    return 0;
+}
+
+float WeightedMerger::ScoreEdgeTypeOne(std::pair<int, int> edge) {
+    int co_cluster_count = 0;
+    for(size_t i = 0; i < this->clustering_list_vec.size(); i ++) {
+        const std::map<int, int>& current_clustering = this->clustering_list_vec.at(i);
+        if (current_clustering.contains(edge.first) && current_clustering.contains(edge.second)) {
+            if (current_clustering.at(edge.first) == current_clustering.at(edge.second)) {
+                co_cluster_count += 1;
+            }
+        }
+    }
+    return co_cluster_count;
+}
+
+float WeightedMerger::ScoreEdgeTypeTwo(std::pair<int, int> edge) {
+    int co_cluster_count = 0;
+    for(size_t i = 0; i < this->clustering_list_vec.size(); i ++) {
+        const std::map<int, int>& current_clustering = this->clustering_list_vec.at(i);
+        if (current_clustering.contains(edge.first) && current_clustering.contains(edge.second)) {
+            if (current_clustering.at(edge.first) == current_clustering.at(edge.second)) {
+                co_cluster_count += 1;
+            } else {
+                co_cluster_count -= 1;
+            }
+        }
+    }
+    return co_cluster_count;
+}
+
+
+float WeightedMerger::ScoreEdge(std::pair<int, int> edge) {
+    if (this->weighting_strategy == 0) {
+        return this->ScoreEdgeTypeZero(edge);
+    } else if (this->weighting_strategy == 1) {
+        return this->ScoreEdgeTypeOne(edge);
+    } else if (this->weighting_strategy == 2) {
+        return this->ScoreEdgeTypeTwo(edge);
+    }
+    return 0;
 }
 
 void WeightedMerger::NodeWorker() {
@@ -29,19 +86,8 @@ void WeightedMerger::NodeWorker() {
 
         std::map<int, float> current_edge_map;
         for(const int& v : this->graph->GetAdjMap().at(current_node_id)) {
-            int co_cluster_count = 0;
-            int cluster_count = 0;
-            for(size_t i = 0; i < this->clustering_list_vec.size(); i ++) {
-                const std::map<int, int>& current_clustering = this->clustering_list_vec.at(i);
-                if (current_clustering.contains(current_node_id) && current_clustering.contains(v)) {
-                    cluster_count += 1;
-                    if (current_clustering.at(current_node_id) == current_clustering.at(v)) {
-                        co_cluster_count += 1;
-                    }
-                }
-            }
-            if (co_cluster_count > 0) {
-                current_edge_map[v] = (float)co_cluster_count / cluster_count;
+            if (current_node_id < v) {
+                current_edge_map[v] = this->ScoreEdge({current_node_id, v});
             }
         }
 
@@ -70,7 +116,6 @@ void WeightedMerger::ConstructGraph() {
         thread_vector[i].join();
     }
     for (auto const& [edge, weight] : this->output_map) {
-        this->graph->AddEdge(edge);
         this->graph->SetWeight(edge, weight);
     }
     this->WriteToLogFile("Graph constructed with " + std::to_string(this->graph->GetNodeSet().size()) + " nodes", Log::info);
@@ -83,10 +128,13 @@ void WeightedMerger::ConstructGraph() {
 
 int WeightedMerger::main() {
     this->ConstructGraph();
-    this->graph->PrintGraph();
-    this->graph = this->graph->Threshold(0.5); // edge weight < 0.5 is removed
-    this->graph->PrintGraph();
-    this->graph->GetConnectedComponents(this->output_cluster_queue);
-    this->WriteClusterQueue();
+    /* this->graph->PrintGraph(); */
+    Graph* thresholded_graph = this->graph->Threshold(this->threshold); // edge weight < 0.5 is removed
+    delete this->graph;
+    this->graph = thresholded_graph;
+    /* this->graph->PrintGraph(); */
+    this->graph->WriteGraph(this->output_weighted_graph);
+    /* this->graph->GetConnectedComponents(this->output_cluster_queue); */
+    /* this->WriteClusterQueue(); */
     return 0;
 }

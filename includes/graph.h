@@ -13,10 +13,10 @@
 
 class Graph {
     public:
-        Graph(){
+        Graph(bool directed): directed(directed){
         };
 
-        Graph(std::string edgelist);
+        Graph(std::string edgelist, bool directed);
         void AddEdge(std::pair<int, int> edge);
 
         static inline char get_delimiter(std::string filepath) {
@@ -42,11 +42,14 @@ class Graph {
         Graph* Threshold(float t);
         void AddNode(int u);
         void PrintGraph() const;
+        void WriteGraph(std::string output_file) const;
+        bool directed;
 
     private:
 
         std::map<std::pair<int, int>, float> edge_weight_map;
         std::set<int> node_set;
+        std::string edgelist;
 
     protected:
         std::map<int, std::set<int>> adj_map;
