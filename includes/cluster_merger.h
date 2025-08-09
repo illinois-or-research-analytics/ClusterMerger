@@ -7,6 +7,7 @@
 #include <random>
 #include <thread>
 #include <map>
+#include <iostream>
 #include <fstream>
 #include <stdexcept>
 #include <sstream>
@@ -16,6 +17,12 @@
 enum Log {info, debug, error = -1};
 
 class ClusterMerger {
+    private:
+        static bool file_is_empty(std::string filepath) {
+            std::ifstream clustering(filepath);
+            return clustering.peek() == std::ifstream::traits_type::eof();
+        }
+
     public:
         ClusterMerger(int num_processors, std::string output_file, std::string log_file, int log_level) : num_processors(num_processors), output_file(output_file), log_file(log_file), log_level(log_level) {
             if(this->log_level > -1) {
@@ -53,6 +60,11 @@ class ClusterMerger {
         static inline std::map<int, std::vector<int>> ReadCommunities(std::string existing_clustering) {
             std::map<int, std::vector<int>> partition_map;
             std::map<int, std::vector<int>> non_singleton_partition_map;
+
+            if (file_is_empty(existing_clustering)) {
+                return non_singleton_partition_map;
+            }
+
             char delimiter = ClusterMerger::get_delimiter(existing_clustering);
             std::ifstream existing_clustering_file(existing_clustering);
             std::string line;
