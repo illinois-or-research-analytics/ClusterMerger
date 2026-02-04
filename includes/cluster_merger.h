@@ -68,6 +68,7 @@ class ClusterMerger {
             char delimiter = ClusterMerger::get_delimiter(existing_clustering);
             std::ifstream existing_clustering_file(existing_clustering);
             std::string line;
+            int line_no = 0;
             while(std::getline(existing_clustering_file, line)) {
                 std::stringstream ss(line);
                 std::string current_value;
@@ -76,12 +77,14 @@ class ClusterMerger {
                     current_line.push_back(current_value);
                 }
                 std::string node_id = current_line[0];
-                if(node_id == "node_id") {
+                if (line_no == 0) {
+                    line_no ++;
                     continue;
                 }
                 int cluster_id = std::atoi(current_line[1].c_str());
                 int integer_node_id = std::atoi(node_id.c_str());
                 partition_map[cluster_id].push_back(integer_node_id);
+                line_no ++;
             }
             for (auto const& [cluster_id, cluster_vec] : partition_map) {
                 if (cluster_vec.size() > 1) {

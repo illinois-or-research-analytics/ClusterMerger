@@ -5,6 +5,7 @@ Graph::Graph(std::string edgelist, bool directed): directed(directed), edgelist(
     char delimiter = Graph::get_delimiter(this->edgelist);
     std::ifstream input_edgelist(this->edgelist);
     std::string line;
+    int line_no = 0;
     while(std::getline(input_edgelist, line)) {
         std::stringstream ss(line);
         std::string current_value;
@@ -12,14 +13,16 @@ Graph::Graph(std::string edgelist, bool directed): directed(directed), edgelist(
         while(std::getline(ss, current_value, delimiter)) {
             current_line.push_back(current_value);
         }
-        std::string citing = current_line[0];
-        if(citing == "#citing") {
+        if (line_no == 0) {
+            line_no ++;
             continue;
         }
+        std::string citing = current_line[0];
         int integer_cited = std::atoi(current_line[1].c_str());
         int integer_citing = std::atoi(citing.c_str());
         this->AddEdge({integer_citing, integer_cited});
         this->SetWeight({integer_citing, integer_cited}, 0);
+        line_no ++;
     }
 }
 

@@ -34,8 +34,8 @@ Optional arguments:
   --log-file               Output log file [required]
   --log-level              Log level where 0 = silent, 1 = info, 2 = verbose [default: 1]
 ```
-- Input edgelist is a two column csv with source and target integer node ids on each row.
-- Clustering list is a file with a file path to a clustering file on each line
+- Input edgelist is a two column csv with source and target integer node ids on each row and a header line. The actual column values of the header row do not matter.
+- Clustering list is a file with a file path to a clustering file on each line. These clustering files should be two column csvs with a header row with node\_id in the first column and cluster\_id in the second column.
 - Weighting strategy is a selector for different edge weighting schemes. Specifically, edge weighting scheme 0 will weight each edge by # co-cluster / # cluster where # co-cluster is the number of input clusterings that co-clustered the endpoints of the edge and # cluster is the number of clustering methods that have both endpoints of the edge in non-singleton clusters. Otherwise, edges get a weight of 0.
 - threshold is a value for which any edge with edge weight less the threshold is removed
 - num processors directly controls the number of new agents that are processed in parellel for each year.
