@@ -134,17 +134,18 @@ void Graph::PrintGraph() const {
 
 void Graph::WriteGraph(std::string output_file) const {
     std::ofstream output_filehandle(output_file);
+    output_filehandle << "source,target,weight" << std::endl;
     if (this->directed) {
         for(auto const& [u,u_neighbors] : this->GetAdjMap()) {
             for(const int& v : u_neighbors) {
-                output_filehandle << u << "\t" << v << "\t" << this->GetWeight({u, v}) << std::endl;
+                output_filehandle << u << "," << v << "," << this->GetWeight({u, v}) << std::endl;
             }
         }
     } else {
         for(auto const& [u,u_neighbors] : this->GetAdjMap()) {
             for(const int& v : u_neighbors) {
                 if (u < v) {
-                    output_filehandle << u << "\t" << v << "\t" << this->GetWeight({u, v}) << std::endl;
+                    output_filehandle << u << "," << v << "," << this->GetWeight({u, v}) << std::endl;
                 }
             }
         }
