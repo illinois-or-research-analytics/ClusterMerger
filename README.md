@@ -38,7 +38,7 @@ Optional arguments:
 - Clustering list is a file with a file path to a clustering file on each line. These clustering files should be two column csvs with a header row with node\_id in the first column and cluster\_id in the second column.
 - Weighting strategy is a selector for different edge weighting schemes. Specifically, edge weighting scheme 0 will weight each edge by # co-cluster / # cluster where # co-cluster is the number of input clusterings that co-clustered the endpoints of the edge and # cluster is the number of clustering methods that have both endpoints of the edge in non-singleton clusters. Otherwise, edges get a weight of 0.
 - threshold is a value for which any edge with edge weight less the threshold is removed
-- num processors directly controls the number of new agents that are processed in parellel for each year.
+- num processors directly controls the number of new nodes that are processed in parellel
 - output file is an unused argument currently.
 - output weigted graph is the file path to which a three column csv edgelist is writen where the format is (source,target,weight) for each row.
 - log file is the file path to which log information gets written
